@@ -16,7 +16,9 @@
 #include <sched.h>
 
 ncclResult_t ncclTopoCudaPath(int cudaDev, char** path);
-
+  /*
+    TODO: ALFARHAN AND ALROGI: TOPOLOGY HEADER FILE
+  */
 struct ncclTopoSystem;
 // Build the topology
 ncclResult_t ncclTopoGetSystem(struct ncclComm* comm, struct ncclTopoSystem** system);

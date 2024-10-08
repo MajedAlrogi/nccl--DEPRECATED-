@@ -567,7 +567,9 @@ static ncclResult_t initTransportsRank(struct ncclComm* comm, ncclUniqueId* comm
   free(allGather1Data);
 
   // AllGather1 - end
-
+  /*
+    TODO: ALFARHAN AND ALROGI: TOPOLOGY
+  */
   // Topo detection / System graph creation
   NCCLCHECK(ncclTopoGetSystem(comm, &comm->topo));
   // Compute paths between GPUs and NICs
