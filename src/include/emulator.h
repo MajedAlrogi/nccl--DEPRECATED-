@@ -176,40 +176,40 @@ struct Controller {
   uint64_t bypassed_recv;
 };
 
-ncclResult_t AddTask(Controller *controller, ncclInfo *info);
+ncclResult_t addTask(Controller *controller, ncclInfo *info);
 
-ncclResult_t InitTask(Controller *controller, ncclInfo *info);
+ncclResult_t initTask(Controller *controller, ncclInfo *info);
 
-ncclResult_t QueryTask(Controller *controller, uint64_t unique_id,
+ncclResult_t queryTask(Controller *controller, uint64_t unique_id,
                           TaskInfo *task);
 
-ncclResult_t RemoveTask(Controller *controller, uint64_t unique_id);
+ncclResult_t removeTask(Controller *controller, uint64_t unique_id);
 
-ncclResult_t BypassCheck(Controller *controller, uint64_t unique_id,
+ncclResult_t bypassCheck(Controller *controller, uint64_t unique_id,
                             int &bypass, std::string msg);
 
-ncclResult_t GlobalInit(Controller *controller, ncclComm *comm);
+ncclResult_t globalInit(Controller *controller, ncclComm *comm);
 // end controller
 
 // begin proxy
 
-int ProxyGetSendSize(Controller *controller, int unique_id, int cid,
+int proxyGetSendSize(Controller *controller, int unique_id, int cid,
                         int &size);
 
-int ProxySend(Controller *controller, int unique_id, int cid, int size);
+int proxySend(Controller *controller, int unique_id, int cid, int size);
 
-int ProxyRecv(Controller *controller, int unique_id, int cid, int size);
+int proxyRecv(Controller *controller, int unique_id, int cid, int size);
 
-int ProxySendDone(Controller *controller, int unique_id, int cid,
+int proxySendDone(Controller *controller, int unique_id, int cid,
                      uint64_t bypassed);
 
-int ProxyRecvDone(Controller *controller, int unique_id, int cid,
+int proxyRecvDone(Controller *controller, int unique_id, int cid,
                      uint64_t bypassed);
 
-int ProxyBypassedSend(Controller *controller, int unique_id, int cid,
+int proxyBypassedSend(Controller *controller, int unique_id, int cid,
                          uint64_t &bypassed);
 
-int ProxyBypassedRecv(Controller *controller, int unique_id, int cid,
+int proxyBypassedRecv(Controller *controller, int unique_id, int cid,
                          uint64_t &bypassed);
 
 #endif // EMULATOR_H
