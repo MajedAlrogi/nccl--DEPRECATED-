@@ -34,7 +34,7 @@ using namespace std;
 
 // Part A: Sending/Recieving helper methods
 static void calc_size_inkernel(int nelem, vector<int> &res) {
-  LOG_MOD(NCCL_MOD, "calc_size_inkernel: nelem=%d", nelem);
+  LOG_NOTE(NCCL_NOTE, "calc_size_inkernel: nelem=%d", nelem);
   int stepSize = 131072; // DEFAULT_BUFFSIZE(simple) / NCCL_STEP / sizeof(float)
   int SlicePerChunk = 2; // all reduce
   int StepPerSlice = 2;  //! i don't know why
@@ -76,7 +76,7 @@ static void calc_size_channel(int nranks, int ringindex, int count,
         ROUNDUP(realChunkSize, (nthreads - 32) * sizeof(uint64_t) / tsize);
     realChunkSize = int(realChunkSize);
 
-    LOG_MOD(NCCL_MOD, "realChunkSize=%lu, nthreads=%d", realChunkSize,
+    LOG_NOTE(NCCL_NOTE, "realChunkSize=%lu, nthreads=%d", realChunkSize,
             nthreads);
 
     auto calcOffset = [&](int chunk) -> ssize_t {
@@ -136,7 +136,7 @@ static void calc_sendsize_channel(int nranks, int myrank, int count,
   for (int i = 0; i < res.size(); ++i) {
     szs = szs + " " + std::to_string(res[i]);
   }
-  LOG_MOD(NCCL_MOD, "Calculated send sizes for ringix:%d rank %d: %s, ch=%d",
+  LOG_NOTE(NCCL_NOTE, "Calculated send sizes for ringix:%d rank %d: %s, ch=%d",
           myringix, myrank, szs.c_str(), mychannel);
 }
 
@@ -153,7 +153,7 @@ static void calc_recvsize_channel(int nranks, int myrank, int count,
   for (int i = 0; i < res.size(); ++i) {
     szs = szs + " " + std::to_string(res[i]);
   }
-  LOG_MOD(NCCL_MOD,
+  LOG_NOTE(NCCL_NOTE,
           "Calculated recv sizes for ringix:%d targetrk:%d, rank %d: %s, ch=%d",
           target_ringix, target, myrank, szs.c_str(), mychannel);
 }
@@ -176,7 +176,7 @@ static int update_done_rank(RankInfo &rank) {
     done = done & check_done_ch(rank.channels[i]);
   }
   rank.done = done;
-  LOG_MOD(NCCL_MOD, "rank update check_done_rank: done=%d, rank=%d", done,
+  LOG_NOTE(NCCL_NOTE, "rank update check_done_rank: done=%d, rank=%d", done,
           rank.myrank);
   return done;
 }
@@ -191,7 +191,7 @@ static void update_done(Coordinator *coordinator) {
   }
   if (done) {
     coordinator->done = 1;
-    LOG_MOD(NCCL_MOD, "coordinator update check_done: done");
+    LOG_NOTE(NCCL_NOTE, "coordinator update check_done: done");
   }
 }
 
@@ -205,7 +205,7 @@ static void update_done(Coordinator *coordinator) {
  * then uses sendrecvInit to initialize the sending and receiving ranks and their respective channels. 
  * This function essentially sets up the entire communication framework for the task.
  * 
- * modCoordinatorDestroy: Resets and cleans up the coordinator once the task is completed, 
+ * CoordinatorDestroy: Resets and cleans up the coordinator once the task is completed, 
  * ensuring that resources are released, and the system can be prepared for the next task.
 */
 
@@ -225,7 +225,7 @@ static void rankInit(Coordinator *coordinator, int rank) {
   if (rankinfo.myrank == coordinator->recvrank) {
     rankinfo.recv = 1;
   }
-  LOG_MOD(NCCL_MOD, "rankInit: myrank=%d, send=%d, recv=%d", rankinfo.myrank,
+  LOG_NOTE(NCCL_NOTE, "rankInit: myrank=%d, send=%d, recv=%d", rankinfo.myrank,
           rankinfo.send, rankinfo.recv);
   rankinfo.channels = vector<ChannelInfo>();
   for (int i = 0; i < nchannels; ++i) {
@@ -285,7 +285,7 @@ static void metaInit(Coordinator *coordinator, ncclProxyOp *proxyOp,
 }
 
 static void sendrecvInit(Coordinator *coordinator, EmuTopology *topology) {
-  LOG_MOD(NCCL_MOD, "sendrecvInit, myranks.size=%lu, nrankpernode=%d",
+  LOG_NOTE(NCCL_NOTE, "sendrecvInit, myranks.size=%lu, nrankpernode=%d",
           topology->myranks.size(), topology->nrankpernode);
   if (topology->myranks.size() < topology->nrankpernode) {
     return;
@@ -303,7 +303,7 @@ static void sendrecvInit(Coordinator *coordinator, EmuTopology *topology) {
   for (auto i : topology->myranks) {
     auto prev = topology->prev[i];
     auto next = topology->next[i];
-    LOG_MOD(NCCL_MOD, "rank=%d, prev=%d, next=%d, ismynode[rank]=%d", i, prev,
+    LOG_NOTE(NCCL_NOTE, "rank=%d, prev=%d, next=%d, ismynode[rank]=%d", i, prev,
             next, (int)ismynode[i]);
     if (!ismynode[next]) {
       assert(coordinator->sendrank == -1);
@@ -315,8 +315,8 @@ static void sendrecvInit(Coordinator *coordinator, EmuTopology *topology) {
     }
   }
   if (coordinator->sendrank != -1 && coordinator->recvrank != -1) {
-    LOG_MOD(
-        NCCL_MOD, "sendrecv solved: sendrank=%d, recvrank=%d, ringmapsize=%lu",
+    LOG_NOTE(
+        NCCL_NOTE, "sendrecv solved: sendrank=%d, recvrank=%d, ringmapsize=%lu",
         coordinator->sendrank, coordinator->recvrank, topology->ringmap.size());
     for (auto i : topology->myranks) {
       rankInit(coordinator, i);
@@ -326,7 +326,7 @@ static void sendrecvInit(Coordinator *coordinator, EmuTopology *topology) {
 
 ncclResult_t coordinatorInit(Coordinator *coordinator,
                                 ncclProxyOp *proxyOp, ncclInfo *info) {
-  LOG_MOD(NCCL_MOD, "CoordinatorInit kbypass=%d", KERNEL_BYPASS);
+  LOG_NOTE(NCCL_NOTE, "CoordinatorInit kbypass=%d", KERNEL_BYPASS);
   if (KERNEL_BYPASS == 1) {
     metaInit(coordinator, proxyOp, info);
     int count = coordinator->task.count;
@@ -336,7 +336,7 @@ ncclResult_t coordinatorInit(Coordinator *coordinator,
     int myrank = comm->rank;
     int nchannels = info->nChannels;
     int nthreads = info->nThreads;
-    LOG_MOD(NCCL_MOD,
+    LOG_NOTE(NCCL_NOTE,
             "CoordinatorInit: kbypass=%d, count=%d, nranks=%d, myrank=%d, "
             "nchannels=%d, "
             "nthreads=%d",
@@ -352,7 +352,7 @@ ncclResult_t coordinatorDestroy(Coordinator *coordinator) {
   coordinator->sendrank = -1;
   coordinator->recvrank = -1;
 
-  LOG_MOD(NCCL_MOD, "CoordinatorDestroy");
+  LOG_NOTE(NCCL_NOTE, "CoordinatorDestroy");
   return ncclSuccess;
 }
 
@@ -375,9 +375,9 @@ ncclResult_t coordinatorGetSendSize(Coordinator *coordinator, int cid,
     size = ch.sendsizes[ch.sendtail];
   } else {
     size = -1;
-    LOG_MOD(NCCL_MOD, "sendtail=%d > recvtail=%d", ch.sendtail, ch.recvtail);
+    LOG_NOTE(NCCL_NOTE, "sendtail=%d > recvtail=%d", ch.sendtail, ch.recvtail);
   }
-    LOG_MOD(NCCL_MOD, "CoordinatorGetSendSize: size=%d", size);
+    LOG_NOTE(NCCL_NOTE, "CoordinatorGetSendSize: size=%d", size);
     return ncclSuccess;
 }
 
@@ -388,10 +388,10 @@ ncclResult_t coordinatorSend(Coordinator *coordinator, int cid,
     ch.sendtail++;
     update_done(coordinator);
   } else {
-    LOG_MOD(NCCL_MOD, "send size unmatch actual: %d != expected: %d", size,
+    LOG_NOTE(NCCL_NOTE, "send size unmatch actual: %d != expected: %d", size,
             ch.sendsizes[ch.sendtail]);
   }
-  LOG_MOD(NCCL_MOD, "CoordinatorSend: size=%d, tail=%d", size, ch.sendtail);
+  LOG_NOTE(NCCL_NOTE, "CoordinatorSend: size=%d, tail=%d", size, ch.sendtail);
   return ncclSuccess;
 }
 
@@ -402,10 +402,10 @@ ncclResult_t coordinatorRecv(Coordinator *coordinator, int cid,
     ch.recvtail++;
     update_done(coordinator);
   } else {
-    LOG_MOD(NCCL_MOD, "recv size unmatch actual: %d != expected: %d", size,
+    LOG_NOTE(NCCL_NOTE, "recv size unmatch actual: %d != expected: %d", size,
             ch.recvsizes[ch.recvtail]);
   }
-  LOG_MOD(NCCL_MOD, "CoordinatorRecv: size=%d, recvtail=%d", size,
+  LOG_NOTE(NCCL_NOTE, "CoordinatorRecv: size=%d, recvtail=%d", size,
           ch.recvtail);
   return ncclSuccess;
 }

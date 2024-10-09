@@ -38,7 +38,7 @@ void Info2Task(ncclInfo *info, TaskInfo *task) {
   }
 
   // Logging the task information for debugging or monitoring purposes
-  LOG_MOD(NCCL_MOD,
+  LOG_NOTE(NCCL_NOTE,
           "Info2Task: count %lu, tsize %d, coll %d, reduceOp %d, algo %d, proto "
           "%d, nchannels %d, nthreads %d, unique_id %lu, root %d",
           task->count, task->tsize, task->coll, task->reduceOp, task->algo,
