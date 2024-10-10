@@ -9,7 +9,7 @@ PREFIX ?= /usr/local
 VERBOSE ?= 0
 KEEP ?= 0
 DEBUG ?= 0
-TRACE ?= 0
+TRACE ?= 1
 PROFAPI ?= 0
 NVTX ?= 1
 

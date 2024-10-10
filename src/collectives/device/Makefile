@@ -20,7 +20,7 @@ STATICLIB  := $(OBJDIR)/colldevice.a
 DEVOBJ     := $(OBJDIR)/devlink.o
 RULESFILE  := $(OBJDIR)/Makefile.rules
 
-NVCUFLAGS  += -I. -I.. -I$(BUILDDIR)/include -I../../include --compiler-options "-fPIC -fvisibility=hidden"
+NVCUFLAGS  += -I. -I.. -I$(BUILDDIR)/include -I../../include --compiler-options "-fPIC -fvisibility=hidden" -Wno-deprecated-gpu-targets
 
 
 all: $(STATICLIB)
