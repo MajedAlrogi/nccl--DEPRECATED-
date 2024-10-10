@@ -31,6 +31,8 @@ void ncclDebugInit() {
     ncclDebugLevel = NCCL_LOG_ABORT;
   } else if (strcasecmp(nccl_debug, "TRACE") == 0) {
     ncclDebugLevel = NCCL_LOG_TRACE;
+  } else if (strcasecmp(nccl_debug, "NOTE") == 0) {
+    ncclDebugLevel = NCCL_LOG_NOTE;
   }
 
   /* Parse the NCCL_DEBUG_SUBSYS env var
@@ -147,8 +149,8 @@ void ncclDebugLog(ncclDebugLogLevel level, unsigned long flags, const char *file
     len = snprintf(buffer, sizeof(buffer),
         "\n%s:%d:%d [%d] %s:%d NCCL WARN ", hostname, pid, tid, cudaDev, filefunc, line);
   else if (level == NCCL_LOG_INFO)
-    len = snprintf(buffer, sizeof(buffer),
-        "%s:%d:%d [%d] NCCL INFO ", hostname, pid, tid, cudaDev);
+    len = snprintf(buffer, sizeof(buffer), "%s:%d:%d [%d] %s:%d NCCL INFO ",
+        hostname, pid, tid, cudaDev, filefunc, line);
 #ifdef ENABLE_TRACE
   else if (level == NCCL_LOG_TRACE) {
     auto delta = std::chrono::high_resolution_clock::now() - ncclEpoch;
@@ -157,6 +159,11 @@ void ncclDebugLog(ncclDebugLogLevel level, unsigned long flags, const char *file
         "%s:%d:%d [%d] %f %s:%d NCCL TRACE ", hostname, pid, tid, cudaDev, timestamp, filefunc, line);
   }
 #endif
+  else if (level == NCCL_LOG_NOTE) {
+
+    len = snprintf(buffer, sizeof(buffer), "%s:%d:%d [%d] %s:%d NCCL NOTE ",
+                   hostname, pid, tid, cudaDev, filefunc, line);
+  }
   if (len) {
     va_list vargs;
     va_start(vargs, fmt);

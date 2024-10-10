@@ -27,7 +27,7 @@ ncclResult_t getAllEnvVars() {
   }
   if (env == NULL) {
     LOG_NOTE(NCCL_LOG_ABORT, "Error: N_MPI_RANKS not set");
-    return ncclModError;
+    return ncclEmulatorError;
   } else {
     NUM_NODES = atoi(env);
     LOG_NOTE(NCCL_NOTE, "MOD_N_MPI_RANKS=%d", NUM_NODES);
@@ -38,7 +38,7 @@ ncclResult_t getAllEnvVars() {
   }
   if (env == NULL) {
     LOG_NOTE(NCCL_LOG_ABORT, "Error: MY_MPI_RANK not set");
-    return ncclModError; // TODO: ALI Alfarhan check the logging
+    return ncclEmulatorError; // TODO: ALI Alfarhan check the logging
   } else {
     MY_NODE = atoi(env);
     LOG_NOTE(NCCL_NOTE, "MY_MPI_RANK=%d", MY_NODE);
